@@ -13,6 +13,7 @@ var injectPartials = require('gulp-inject-partials');
 var minify = require('gulp-minify');
 var cssmin = require('gulp-cssmin');
 var rename = require('gulp-rename');
+var htmlmin = require('gulp-htmlmin');
 
 var SOURCEPATHS = {
 
@@ -87,8 +88,6 @@ gulp.task('compress', function(){
 gulp.task('compresscss', function(){
 	var bootrstrapCSS = gulp.src('C:./node_modules/bootstrap/dist/css/bootstrap.css');
 	var sassFiles;
-
-
 	sassFiles = gulp.src(SOURCEPATHS.sassSource)
 			.pipe(autoprefixer())
 			.pipe(sass({outputStyle: 'expanded'}).on('error', sass.logError))
@@ -99,14 +98,20 @@ gulp.task('compresscss', function(){
 			.pipe(rename({suffix: '.min'}))
 			.pipe(gulp.dest(APPPATH.css));
 });
+
+gulp.task('minifyHtml', function(){
+	return gulp.src(SOURCEPATHS.htmlSource)
+	.pipe(injectPartials())
+	.pipe(htmlmin({collapseWhitespace:true}))
+	.pipe(gulp.dest(APPPATH.root))
+});
 /**End of Productin Task**/
 
 gulp.task('html', function(){
 	return gulp.src(SOURCEPATHS.htmlSource)
 	.pipe(injectPartials())
 	.pipe(gulp.dest(APPPATH.root))
-
-})
+});
 /*
 gulp.task('copy', ['clean-html'], function(){
 	gulp.src(SOURCEPATHS.htmlSource)
@@ -131,3 +136,5 @@ gulp.task('watch', ['serve', 'sass', 'clean-html', 'clean-scripts', 'scripts', '
 });
 
 gulp.task('default', ['watch']);
+
+gulp.task('production', ['minifyHtml', 'compresscss', 'compress']);
